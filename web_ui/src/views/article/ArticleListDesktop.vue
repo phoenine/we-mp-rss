@@ -270,11 +270,11 @@ const columns = [
   },
   {
     title: '发布时间',
-    dataIndex: 'publish_time',
+    dataIndex: 'publish_at',
     width: '140',
     render: ({ record }) => h('span',
       { style: { color: 'rgb(var(--color-text-3))', fontSize: '12px' } },
-      formatTimestamp(record.publish_time)
+      formatDateTime(record.publish_at)
     )
   },
   {

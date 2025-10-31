@@ -1,4 +1,4 @@
-import http from './http'
+import http from "./http";
 
 /**
  * 文章实体接口
@@ -12,14 +12,15 @@ import http from './http'
  * @property created_at 创建时间
  */
 export interface Article {
-  id: number
-  title: string
-  content: string
-  mp_name: string
-  publish_time: string
-  status: number
-  link: string
-  created_at: string
+    id: number;
+    title: string;
+    content: string;
+    mp_name: string;
+    publish_time: string;
+    publish_at?: string;
+    status: number;
+    link: string;
+    created_at: string;
 }
 
 /**
@@ -31,11 +32,11 @@ export interface Article {
  * @property mp_id 公众号ID
  */
 export interface ArticleListParams {
-  offset?: number
-  limit?: number
-  search?: string
-  status?: number
-  mp_id?: string
+    offset?: number;
+    limit?: number;
+    search?: string;
+    status?: number;
+    mp_id?: string;
 }
 
 /**
@@ -44,8 +45,8 @@ export interface ArticleListParams {
  * @property data 文章列表数据
  */
 export interface ArticleListResult {
-  code: number
-  data: Article[]
+    code: number;
+    data: Article[];
 }
 
 /**
@@ -54,18 +55,18 @@ export interface ArticleListResult {
  * @returns 文章列表结果
  */
 export const getArticles = (params: ArticleListParams) => {
-  // 转换分页参数
-  const apiParams = {
-    offset: (params.page || 0) * (params.pageSize || 10),
-    limit: params.pageSize || 10,
-    search: params.search,
-    status: params.status,
-    mp_id: params.mp_id
-  }
-  return http.get<ArticleListResult>('/wx/articles', { 
-    params: apiParams 
-  })
-}
+    // 转换分页参数
+    const apiParams = {
+        offset: (params.page || 0) * (params.pageSize || 10),
+        limit: params.pageSize || 10,
+        search: params.search,
+        status: params.status,
+        mp_id: params.mp_id,
+    };
+    return http.get<ArticleListResult>("/wx/articles", {
+        params: apiParams,
+    });
+};
 
 /**
  * 获取文章详情
@@ -73,18 +74,22 @@ export const getArticles = (params: ArticleListParams) => {
  * @parama 类型 0当前,-1上一篇,1下一篇
  * @returns 文章详情结果
  */
-export const getArticleDetail = (id: number,action_type:number) => {
-  switch(action_type){
-    case -1:
-      return http.get<{code: number, data: Article}>(`/wx/articles/${id}/prev`)
-    case 1:
-      return http.get<{code: number, data: Article}>(`/wx/articles/${id}/next`)
-    default:
-      // 默认获取当前文章详情
-      return http.get<{code: number, data: Article}>(`/wx/articles/${id}`)
-      break
-  }
-}
+export const getArticleDetail = (id: number, action_type: number) => {
+    switch (action_type) {
+        case -1:
+            return http.get<{ code: number; data: Article }>(
+                `/wx/articles/${id}/prev`
+            );
+        case 1:
+            return http.get<{ code: number; data: Article }>(
+                `/wx/articles/${id}/next`
+            );
+        default:
+            // 默认获取当前文章详情
+            return http.get<{ code: number; data: Article }>(`/wx/articles/${id}`);
+            break;
+    }
+};
 
 /**
  * 获取上一篇文章详情
@@ -92,8 +97,8 @@ export const getArticleDetail = (id: number,action_type:number) => {
  * @returns 上一篇文章详情结果
  */
 export const getPrevArticleDetail = (id: number) => {
-  return http.get<{code: number, data: Article}>(`/wx/articles/${id}/prev`)
-}
+    return http.get<{ code: number; data: Article }>(`/wx/articles/${id}/prev`);
+};
 
 /**
  * 获取下一篇文章详情
@@ -101,8 +106,8 @@ export const getPrevArticleDetail = (id: number) => {
  * @returns 下一篇文章详情结果
  */
 export const getNextArticleDetail = (id: number) => {
-  return http.get<{code: number, data: Article}>(`/wx/articles/${id}/next`)
-}
+    return http.get<{ code: number; data: Article }>(`/wx/articles/${id}/next`);
+};
 
 /**
  * 删除文章
@@ -110,8 +115,8 @@ export const getNextArticleDetail = (id: number) => {
  * @returns 删除结果
  */
 export const deleteArticle = (id: number) => {
-  return http.delete<{code: number, message: string}>(`/wx/articles/${id}`)
-}
+    return http.delete<{ code: number; message: string }>(`/wx/articles/${id}`);
+};
 
 /**
  * 清空所有文章
@@ -119,8 +124,8 @@ export const deleteArticle = (id: number) => {
  * @returns 清空结果
  */
 export const ClearArticle = (id: number) => {
-  return http.delete<{code: number, message: string}>(`/wx/articles/clean`)
-}
+    return http.delete<{ code: number; message: string }>(`/wx/articles/clean`);
+};
 
 /**
  * 清空重复文章
@@ -128,6 +133,7 @@ export const ClearArticle = (id: number) => {
  * @returns 清空结果
  */
 export const ClearDuplicateArticle = (id: number) => {
-  return http.delete<{code: number, message: string}>(`/wx/articles/clean_duplicate_articles`)
-}
-
+    return http.delete<{ code: number; message: string }>(
+        `/wx/articles/clean_duplicate_articles`
+    );
+};
