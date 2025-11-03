@@ -6,6 +6,7 @@ from .models import Feed, Article
 from .config import cfg
 from core.models.base import Base
 from core.print import print_warning, print_info, print_error, print_success
+from datetime import datetime, timedelta
 
 # 声明基类
 # Base = declarative_base()
@@ -229,25 +230,22 @@ class Db:
         def _session():
             if UseInThread:
                 self.Session = scoped_session(self.session_factory)
-                # self.Session=self.session_factory
             else:
                 self.Session = self.session_factory
-            # self.bind_event(self.Session)
             return self.Session
 
         if self.Session is None:
             _session()
 
         session = self.Session()
-        # session.expire_all()
-        # session.expire_on_commit = True  # 确保每次提交后对象过期
-        # 检查会话是否已经关闭
         if not session.is_active:
             from core.print import print_info
 
             print_info(f"[{self.tag}] Session is already closed.")
             _session()
             return self.Session()
+        return session
+
         # 检查数据库连接是否已断开
         try:
             from core.models import User
@@ -264,6 +262,24 @@ class Db:
             _session()
             return self.Session()
         return session
+
+    def clean_expired_articles(self) -> int:
+        """删除publish_at在当前时间点往前15天的文章, 返回删除数量"""
+        session = self.get_session()
+        try:
+            threshold = datetime.now() - timedelta(days=15)
+            deleted_count = (
+                session.query(Article)
+                .filter(Article.publish_at.isnot(None))
+                .filter(Article.publish_at < threshold)
+                .delete(synchronize_session=False)
+            )
+            session.commit()
+            return deleted_count
+        except Exception as e:
+            session.rollback()
+            print_error(f"DB.clean_expired_articles错误: {str(e)}")
+            raise
 
     def auto_refresh(self):
         # 定义一个事件监听器，在对象更新后自动刷新

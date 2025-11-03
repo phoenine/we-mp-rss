@@ -137,3 +137,11 @@ export const ClearDuplicateArticle = (id: number) => {
         `/wx/articles/clean_duplicate_articles`
     );
 };
+
+/**
+ * 清理过期文章（删除 publish_at 为本月之前的所有文章）
+ * @returns 清理结果
+ */
+export const ClearExpiredArticle = () => {
+    return http.delete<{ code: number; message: string }>(`/wx/articles/clean_expired`);
+};

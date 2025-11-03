@@ -1,10 +1,19 @@
 <template>
   <a-spin :loading="fullLoading" tip="正在刷新..." size="large">
     <a-layout class="article-list">
-      <a-layout-content :style="{ padding: '20px', width: '100%', height: '100%', overflow: 'auto' }" @scroll="handleScroll">
-        <a-page-header 
-          :title="activeFeed ? activeFeed.name : '全部'" 
-           :show-back="false">
+      <a-layout-content
+        :style="{
+          padding: '20px',
+          width: '100%',
+          height: '100%',
+          overflow: 'auto',
+        }"
+        @scroll="handleScroll"
+      >
+        <a-page-header
+          :title="activeFeed ? activeFeed.name : '全部'"
+          :show-back="false"
+        >
           <template #extra>
             <a-space>
               <a-button type="primary" @click="showMpList">
@@ -15,9 +24,15 @@
           </template>
         </a-page-header>
 
-        <a-card style="border:0">
+        <a-card style="border: 0">
           <div class="search-bar">
-            <a-input-search v-model="searchText" placeholder="搜索文章标题" @search="handleSearch" @keyup.enter="handleSearch" allow-clear />
+            <a-input-search
+              v-model="searchText"
+              placeholder="搜索文章标题"
+              @search="handleSearch"
+              @keyup.enter="handleSearch"
+              allow-clear
+            />
           </div>
 
           <a-list :data="articles" :loading="loading" bordered>
@@ -25,12 +40,23 @@
               <a-list-item>
                 <a-list-item-meta>
                   <template #title>
-                    <a-typography-text strong :heading="1"><strong>{{ item.title }}</strong></a-typography-text>
+                    <a-typography-text strong :heading="1"
+                      ><strong>{{ item.title }}</strong></a-typography-text
+                    >
                   </template>
                   <template #description>
-                    <a-typography-text strong :heading="2" @click="viewArticle(item)">{{ item.mp_name || '未知公众号' }}</a-typography-text>
-                    <a-typography-text type="secondary"> {{ item.description }}</a-typography-text>
-                    <a-typography-text type="secondary" strong> {{ formatDateTime(item.created_at) }}</a-typography-text>
+                    <a-typography-text
+                      strong
+                      :heading="2"
+                      @click="viewArticle(item)"
+                      >{{ item.mp_name || "未知公众号" }}</a-typography-text
+                    >
+                    <a-typography-text type="secondary">
+                      {{ item.description }}</a-typography-text
+                    >
+                    <a-typography-text type="secondary" strong>
+                      {{ formatDateTime(item.created_at) }}</a-typography-text
+                    >
                   </template>
                 </a-list-item-meta>
                 <a-button type="text" @click="viewArticle(item)">
@@ -42,65 +68,99 @@
           </a-list>
 
           <div class="list-footer">
-  <div v-if="loadingMore" class="loading-more">
-    加载中...
-  </div>
-  <a-button 
-    v-else-if="hasMore" 
-    type="primary" 
-    @click="fetchArticles(true)"
-    class="load-more-btn"
-  >
-    加载更多
-  </a-button>
-  <div class="total-count">
-    共 {{ pagination.total }} 条
-  </div>
-</div>
+            <div v-if="loadingMore" class="loading-more">加载中...</div>
+            <a-button
+              v-else-if="hasMore"
+              type="primary"
+              @click="fetchArticles(true)"
+              class="load-more-btn"
+            >
+              加载更多
+            </a-button>
+            <div class="total-count">共 {{ pagination.total }} 条</div>
+          </div>
         </a-card>
       </a-layout-content>
     </a-layout>
   </a-spin>
 
-  <a-drawer v-model:visible="mpListVisible" title="选择公众号" @ok="handleMpSelect" @cancel="mpListVisible = false" placement="left" width="99%">
+  <a-drawer
+    v-model:visible="mpListVisible"
+    title="选择公众号"
+    @ok="handleMpSelect"
+    @cancel="mpListVisible = false"
+    placement="left"
+    width="99%"
+  >
     <a-list :data="mpList" :loading="mpLoading" bordered>
       <template #item="{ item }">
-        <a-list-item @click="handleMpClick(item.id)" :class="{ 'active-mp': activeMpId === item.id }">
-            <img :src="Avatar(item.avatar)" width="40" style="float:left;margin-right:1rem;"/>
-            <a-typography-text style="line-height:40px;margin-left:1rem;" strong>{{ item.name || item.mp_name }}</a-typography-text>
+        <a-list-item
+          @click="handleMpClick(item.id)"
+          :class="{ 'active-mp': activeMpId === item.id }"
+        >
+          <img
+            :src="Avatar(item.avatar)"
+            width="40"
+            style="float: left; margin-right: 1rem"
+          />
+          <a-typography-text
+            style="line-height: 40px; margin-left: 1rem"
+            strong
+            >{{ item.name || item.mp_name }}</a-typography-text
+          >
         </a-list-item>
       </template>
     </a-list>
-      <template #footer>
-        <a-link href="/add-subscription"  style="float:left;">
-          <a-icon type="plus" />
-          <span>添加订阅</span>
-        </a-link>
-        <a-button type="primary" @click="handleMpSelect">开始阅读</a-button>
-      </template>
+    <template #footer>
+      <a-link href="/add-subscription" style="float: left">
+        <a-icon type="plus" />
+        <span>添加订阅</span>
+      </a-link>
+      <a-button type="primary" @click="handleMpSelect">开始阅读</a-button>
+    </template>
   </a-drawer>
 
-  <a-drawer id="article-modal"
-    v-model:visible="articleModalVisible" 
+  <a-drawer
+    id="article-modal"
+    v-model:visible="articleModalVisible"
     title="WeRss"
     placement="left"
     width="100vw"
     :footer="false"
     :fullscreen="false"
   >
-    <div style="padding: 20px; overflow-y: auto;clear:both;">
-      <div><h2 id="topreader">{{currentArticle.title}}</h2></div>
-        <div style="margin-top: 20px; color: var(--color-text-3); text-align: left;position:fixed;left:40%;top:-3px;">
-        <a-link @click="viewArticle(currentArticle,-1)" target="_blank">上一篇 </a-link>
-        <a-space/>
-        <a-link @click="viewArticle(currentArticle,1)" target="_blank">下一篇 </a-link>
-       </div>
-       <div style="margin-top: 20px; color: var(--color-text-3); text-align: left">
-       <a-link :href="currentArticle.url" target="_blank">查看原文</a-link>
-       更新时间 ：{{ currentArticle.time }}
+    <div style="padding: 20px; overflow-y: auto; clear: both">
+      <div>
+        <h2 id="topreader">{{ currentArticle.title }}</h2>
+      </div>
+      <div
+        style="
+          margin-top: 20px;
+          color: var(--color-text-3);
+          text-align: left;
+          position: fixed;
+          left: 40%;
+          top: -3px;
+        "
+      >
+        <a-link @click="viewArticle(currentArticle, -1)" target="_blank"
+          >上一篇
+        </a-link>
+        <a-space />
+        <a-link @click="viewArticle(currentArticle, 1)" target="_blank"
+          >下一篇
+        </a-link>
+      </div>
+      <div
+        style="margin-top: 20px; color: var(--color-text-3); text-align: left"
+      >
+        <a-link :href="currentArticle.url" target="_blank">查看原文</a-link>
+        更新时间 ：{{ currentArticle.time }}
       </div>
       <div v-html="currentArticle.content"></div>
-      <div style="margin-top: 20px; color: var(--color-text-3); text-align: right">
+      <div
+        style="margin-top: 20px; color: var(--color-text-3); text-align: right"
+      >
         {{ currentArticle.time }}
       </div>
     </div>
@@ -108,20 +168,25 @@
 </template>
 
 <script setup lang="ts">
-import { formatDateTime,formatTimestamp } from '@/utils/date'
-import { Avatar } from '@/utils/constants'
-import { ref, onMounted } from 'vue'
-import { getArticles, getArticleDetail,getPrevArticle,getNextArticle} from '@/api/article'
-import { getSubscriptions } from '@/api/subscription'
-import { Message } from '@arco-design/web-vue'
+import { formatDateTime, formatTimestamp } from "@/utils/date";
+import { Avatar } from "@/utils/constants";
+import { ref, onMounted } from "vue";
+import {
+  getArticles,
+  getArticleDetail,
+  getPrevArticle,
+  getNextArticle,
+} from "@/api/article";
+import { getSubscriptions } from "@/api/subscription";
+import { Message } from "@arco-design/web-vue";
 
-const articles = ref([])
-const loading = ref(false)
-const mpList = ref([])
-const mpLoading = ref(false)
-const activeMpId = ref('')
-const searchText = ref('')
-const mpListVisible = ref(false)
+const articles = ref([]);
+const loading = ref(false);
+const mpList = ref([]);
+const mpLoading = ref(false);
+const activeMpId = ref("");
+const searchText = ref("");
+const mpListVisible = ref(false);
 
 const pagination = ref({
   current: 1,
@@ -130,168 +195,179 @@ const pagination = ref({
   showTotal: true,
   showJumper: true,
   showPageSize: true,
-  pageSizeOptions: [10]
-})
+  pageSizeOptions: [10],
+});
 
 const activeFeed = ref({
   id: "",
   name: "全部",
-})
+});
 
 const showMpList = () => {
-  mpListVisible.value = true
-}
+  mpListVisible.value = true;
+};
 
 const handleMpSelect = () => {
-  mpListVisible.value = false
-  fetchArticles()
-}
+  mpListVisible.value = false;
+  fetchArticles();
+};
 
 const handleMpClick = (mpId: string) => {
-  activeMpId.value = mpId
-  activeFeed.value = mpList.value.find(item => item.id === activeMpId.value) || { id: "", name: "全部" }
-}
+  activeMpId.value = mpId;
+  activeFeed.value = mpList.value.find(
+    (item) => item.id === activeMpId.value
+  ) || { id: "", name: "全部" };
+};
 
 const fetchArticles = async (isLoadMore = false) => {
   if (loading.value || (isLoadMore && !hasMore.value)) return;
-  loading.value = true
+  loading.value = true;
   try {
     const res = await getArticles({
       page: isLoadMore ? pagination.value.current : 0,
       pageSize: pagination.value.pageSize,
       search: searchText.value,
-      mp_id: activeMpId.value
-    })
+      mp_id: activeMpId.value,
+    });
 
     if (isLoadMore) {
-      articles.value = [...articles.value, ...(res.list || []).map(item => ({
-        ...item,
-        mp_name: item.mp_name || item.account_name || '未知公众号',
-        url: item.url || "https://mp.weixin.qq.com/s/" + item.id
-      }))]
+      articles.value = [
+        ...articles.value,
+        ...(res.list || []).map((item) => ({
+          ...item,
+          mp_name: item.mp_name || item.account_name || "未知公众号",
+          url: item.url || "https://mp.weixin.qq.com/s/" + item.id,
+        })),
+      ];
     } else {
-      articles.value = (res.list || []).map(item => ({
+      articles.value = (res.list || []).map((item) => ({
         ...item,
-        mp_name: item.mp_name || item.account_name || '未知公众号',
-        url: item.url || "https://mp.weixin.qq.com/s/" + item.id
-      }))
+        mp_name: item.mp_name || item.account_name || "未知公众号",
+        url: item.url || "https://mp.weixin.qq.com/s/" + item.id,
+      }));
     }
-    
-    pagination.value.total = res.total || 0
-    hasMore.value = res.list && res.list.length >= pagination.value.pageSize
+
+    pagination.value.total = res.total || 0;
+    hasMore.value = res.list && res.list.length >= pagination.value.pageSize;
     if (isLoadMore) {
-      pagination.value.current++
+      pagination.value.current++;
     }
   } catch (error) {
-    console.error('获取文章列表错误:', error)
-    Message.error(error)
+    console.error("获取文章列表错误:", error);
+    Message.error(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handlePageChange = (page: number, pageSize: number) => {
-  pagination.value.current = page
-  pagination.value.pageSize = pageSize
-  fetchArticles()
-}
+  pagination.value.current = page;
+  pagination.value.pageSize = pageSize;
+  fetchArticles();
+};
 
 const handleSearch = () => {
-  pagination.value.current = 1
-  fetchArticles()
-}
- const processedContent = (record: any) => {
- return record.content.replace(
+  pagination.value.current = 1;
+  fetchArticles();
+};
+const processedContent = (record: any) => {
+  return record.content
+    .replace(
       /(<img[^>]*src=["'])(?!\/static\/res\/logo\/)([^"']*)/g,
-      '$1/static/res/logo/$2'
- ).replace(/<img([^>]*)width=["'][^"']*["']([^>]*)>/g, '<img$1$2>')
- }
-const viewArticle = async (record: any,action_type: number) => {
-  loading.value = true
+      "$1/static/res/logo/$2"
+    )
+    .replace(/<img([^>]*)width=["'][^"']*["']([^>]*)>/g, "<img$1$2>");
+};
+const viewArticle = async (record: any, action_type: number) => {
+  loading.value = true;
   try {
     // console.log(record)
-    const article = await getArticleDetail(record.id,action_type)
+    const article = await getArticleDetail(record.id, action_type);
     currentArticle.value = {
       id: article.id,
       title: article.title,
       content: processedContent(article),
       time: formatDateTime(article.created_at),
-      url: article.url
-    }
-    articleModalVisible.value = true
-    window.location="#topreader"
+      url: article.url,
+    };
+    articleModalVisible.value = true;
+    window.location = "#topreader";
   } catch (error) {
-    console.error('获取文章详情错误:', error)
-    Message.error(error)
+    console.error("获取文章详情错误:", error);
+    Message.error(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const currentArticle = ref({
-  id: '',
-  title: '',
-  content: '',
-  time: '',
-  url: ''
-})
+  id: "",
+  title: "",
+  content: "",
+  time: "",
+  url: "",
+});
 
-const articleModalVisible = ref(false)
+const articleModalVisible = ref(false);
 
-const fullLoading = ref(false)
-const loadingMore = ref(false)
-const hasMore = ref(true)
+const fullLoading = ref(false);
+const loadingMore = ref(false);
+const hasMore = ref(true);
 
 const handleScroll = (event: Event) => {
-  const target = event.target as HTMLElement
-  const { scrollTop, scrollHeight, clientHeight } = target
-  if (scrollHeight - (scrollTop + clientHeight) < 100 && !loadingMore.value && hasMore.value) {
-    loadingMore.value = true
+  const target = event.target as HTMLElement;
+  const { scrollTop, scrollHeight, clientHeight } = target;
+  if (
+    scrollHeight - (scrollTop + clientHeight) < 100 &&
+    !loadingMore.value &&
+    hasMore.value
+  ) {
+    loadingMore.value = true;
     fetchArticles(true).finally(() => {
-      loadingMore.value = false
-    })
+      loadingMore.value = false;
+    });
   }
-}
+};
 
 const refresh = () => {
-  fullLoading.value = true
+  fullLoading.value = true;
   fetchArticles().finally(() => {
-    fullLoading.value = false
-  })
-}
+    fullLoading.value = false;
+  });
+};
 
 const clear_articles = () => {
-  fullLoading.value = true
+  fullLoading.value = true;
   fetchArticles().finally(() => {
-    fullLoading.value = false
-  })
-}
+    fullLoading.value = false;
+  });
+};
 
 const fetchMpList = async () => {
-  mpLoading.value = true
+  mpLoading.value = true;
   try {
     const res = await getSubscriptions({
       page: 0,
-      pageSize: 100
-    })
-    
-    mpList.value = res.list.map(item => ({
+      pageSize: 100,
+    });
+
+    mpList.value = res.list.map((item) => ({
       id: item.id || item.mp_id,
       name: item.name || item.mp_name,
-      avatar: item.avatar || item.mp_cover || '',
-      mp_intro: item.mp_intro || item.mp_intro || ''
-    }))
+      avatar: item.avatar || item.mp_cover || "",
+      mp_intro: item.mp_intro || item.mp_intro || "",
+    }));
   } catch (error) {
-    console.error('获取公众号列表错误:', error)
+    console.error("获取公众号列表错误:", error);
   } finally {
-    mpLoading.value = false
+    mpLoading.value = false;
   }
-}
+};
 
 onMounted(() => {
-  fetchMpList()
-  fetchArticles()
-})
+  fetchMpList();
+  fetchArticles();
+});
 </script>
 
 <style scoped>
@@ -362,7 +438,7 @@ a-button {
 .load-more-btn {
   margin: 16px 0;
 }
-.arco-typography{
+.arco-typography {
   margin-right: 16px;
 }
 .total-count {
@@ -370,12 +446,12 @@ a-button {
   font-size: 14px;
   margin-bottom: 16px;
 }
-.arco-list-wrapper{
-  width:80vw;
+.arco-list-wrapper {
+  width: 80vw;
 }
 </style>
 <style>
-#article-modal img{
-   max-width:100%;
+#article-modal img {
+  max-width: 100%;
 }
 </style>

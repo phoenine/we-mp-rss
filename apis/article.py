@@ -1,3 +1,4 @@
+# 顶部导入与路由创建（节选）
 from fastapi import APIRouter, Depends, HTTPException, status as fast_status, Query
 from core.auth import get_current_user
 from core.db import DB
@@ -10,6 +11,19 @@ from apis.base import format_search_kw
 from core.print import print_warning, print_info, print_error, print_success
 
 router = APIRouter(prefix=f"/articles", tags=["文章管理"])
+
+
+@router.delete("/clean_expired", summary="清理过期文章(删除15天前的publish_at)")
+async def clean_expired_articles(current_user: dict = Depends(get_current_user)):
+    try:
+        deleted_count = DB.clean_expired_articles()
+        return success_response({"message": "清理过期文章成功", "deleted_count": deleted_count})
+    except Exception as e:
+        print_error(f"清理过期文章错误: {str(e)}")
+        raise HTTPException(
+            status_code=fast_status.HTTP_201_CREATED,
+            detail=error_response(code=50001, message="清理过期文章失败"),
+        )
 
 
 @router.delete("/clean", summary="清理无效文章(MP_ID不存在于Feeds表中的文章)")
