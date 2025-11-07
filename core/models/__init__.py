@@ -9,6 +9,6 @@ from .message_task import MessageTask
 # 导入配置管理模型
 from .config_management import ConfigManagement
 # 导入事件模型
-from .event import Event
+from .events import Events
 # 导入基础模型
 from .base import *
