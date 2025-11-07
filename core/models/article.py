@@ -16,3 +16,4 @@ class ArticleBase(Base):
     is_export = Column(Integer)
 class Article(ArticleBase):
     content = Column(Text)
+    content_md = Column(Text)

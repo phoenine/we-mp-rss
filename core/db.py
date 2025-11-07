@@ -115,14 +115,21 @@ class Db:
             from datetime import datetime
 
             # 从 publish_time 回填 publish_at（如果缺失）
-            if (article_data.get("publish_at") is None) and article_data.get(
-                "publish_time"
-            ) is not None:
+            if (article_data.get("publish_at") is None) and article_data.get("publish_time") is not None:
                 try:
                     ts = int(article_data.get("publish_time"))
                     article_data["publish_at"] = datetime.fromtimestamp(ts)
                 except Exception:
                     pass
+
+            # 自动生成 Markdown（仅当未显式提供且有 HTML 内容）
+            if not article_data.get("content_md") and article_data.get("content"):
+                try:
+                    from core.content_format import format_content
+                    article_data["content_md"] = format_content(article_data["content"], "markdown")
+                except Exception:
+                    pass
+
             art = Article(**article_data)
             if art.id:
                 art.id = f"{str(art.mp_id)}-{art.id}".replace("MP_WXS_", "")

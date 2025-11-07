@@ -14,6 +14,13 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - we-mp-rss
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootpass123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   we-mp-rss:
     image: we-mp-rss:local
@@ -28,12 +35,17 @@ services:
     volumes:
       - ./data:/app/data
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+    networks:
+      - we-mp-rss
 
 volumes:
   db_data:
 
 networks:
   we-mp-rss:
+    name: we-mp-rss-net
+    driver: bridge
 
 
