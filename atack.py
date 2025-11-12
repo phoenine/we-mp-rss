@@ -1,5 +1,6 @@
 import socket
 
+
 def scan_ports(ip, ports=None, timeout=1):
     if ports is None:
         ports = [21, 22, 23, 80, 135, 139, 443, 445, 3389, 8080]
@@ -17,8 +18,10 @@ def scan_ports(ip, ports=None, timeout=1):
             s.close()
     return open_ports
 
+
 def check_ftp_weak_password(ip, port=21):
     import ftplib
+
     try:
         ftp = ftplib.FTP()
         ftp.connect(ip, port, timeout=2)
@@ -29,6 +32,7 @@ def check_ftp_weak_password(ip, port=21):
     except Exception:
         return False
 
+
 def vulnerability_check(ip, open_ports):
     vulns = []
     # 检查高危端口
@@ -36,7 +40,7 @@ def vulnerability_check(ip, open_ports):
         21: "FTP服务，可能存在弱口令或匿名访问",
         23: "Telnet服务，明文传输，易受攻击",
         445: "SMB服务，易受蠕虫攻击",
-        3389: "远程桌面服务，建议加强认证"
+        3389: "远程桌面服务，建议加强认证",
     }
     for port in open_ports:
         if port in high_risk_ports:
@@ -45,6 +49,7 @@ def vulnerability_check(ip, open_ports):
         if port == 21 and check_ftp_weak_password(ip, 21):
             vulns.append("FTP服务允许匿名登录，存在高危漏洞")
     return vulns
+
 
 def get_security_advice(vulns):
     advice = []
@@ -59,6 +64,7 @@ def get_security_advice(vulns):
             advice.append("建议：开启远程桌面双因素认证，限制访问来源。")
     return list(set(advice))  # 去重
 
+
 if __name__ == "__main__":
     target_ip = input("请输入要检测的IP地址：")
     ports = input("请输入要扫描的端口（用逗号分隔，留空则扫描常见端口）：")
@@ -67,7 +73,11 @@ if __name__ == "__main__":
     else:
         ports = None
     open_ports = scan_ports(target_ip, ports)
-    print(f"{target_ip} 开放的端口有: {open_ports}" if open_ports else "未检测到开放端口。")
+    print(
+        f"{target_ip} 开放的端口有: {open_ports}"
+        if open_ports
+        else "未检测到开放端口。"
+    )
     vulns = vulnerability_check(target_ip, open_ports)
     if vulns:
         print("检测到的安全风险：")

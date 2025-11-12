@@ -1,15 +1,18 @@
-from core.config import Config,cfg
+__package__ = "driver"
+from core.config import Config, cfg
+
 # 确保data目录和wx.lic文件存在
 import os
-lic_path="./data/wx.lic"
+
+lic_path = "./data/wx.lic"
 os.makedirs(os.path.dirname(lic_path), exist_ok=True)
 if not os.path.exists(lic_path):
     with open(lic_path, "w") as f:
         f.write("{}")
 wx_cfg = Config(lic_path)
 
-def set_token(data:any,ext_data:any=None):
 
+def set_token(data: any, ext_data: any = None):
     """
     设置微信登录的Token和Cookie信息
     :param data: 包含Token和Cookie信息的字典
@@ -25,13 +28,15 @@ def set_token(data:any,ext_data:any=None):
     wx_cfg.save_config()
     wx_cfg.reload()
     from jobs.notice import sys_notice
-    sys_notice(f"""WeRss授权成功
-               - Token: {data.get("token")}
-               - Expiry: {data.get("expiry")['expiry_time']}
-                """, cfg.get("server.code_title","WeRss授权成功"))
+
+    sys_notice(
+        f"""WeRss授权成功
+- Token: {data.get("token")}
+- Expiry: {data.get("expiry")['expiry_time']}
+""",
+        str(cfg.get("server.code_title", "WeRss授权成功")),
+    )
 
 
-    # cfg.set("token", data.get("token", ""))
-    # cfg.save_config()
-def get(key:str,default:any=None):
-    return wx_cfg.get(key, default)
+def get(key: str, default: str = "") -> str:
+    return str(wx_cfg.get(key, default))

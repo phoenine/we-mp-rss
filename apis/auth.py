@@ -9,11 +9,12 @@ from core.auth import (
 )
 from .ver import API_VERSION
 from .base import success_response, error_response
-from driver.wx import WX_API
+from driver.base import WX_API
 from core.config import set_config, cfg
 
 router = APIRouter(prefix=f"/auth", tags=["认证"])
 from driver.success import Success
+from driver.wx_api import get_qr_code  # 通过API登录
 
 
 def ApiSuccess(data):
@@ -28,6 +29,7 @@ def ApiSuccess(data):
 
 @router.get("/qr/code", summary="获取登录二维码")
 async def get_qrcode(current_user=Depends(get_current_user)):
+
     code_url = WX_API.GetCode(Success)
     return success_response(code_url)
 
@@ -42,7 +44,7 @@ async def qr_status(current_user=Depends(get_current_user)):
     #  from driver.success import  getStatus
     return success_response(
         {
-            "login_status": WX_API.HasLogin,
+            "login_status": WX_API.HasLogin(),
         }
     )
 

@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from .cfg import wx_cfg, cfg
 import core.db as db
 
-
+# TODO: base.py中也有类似的实现，需要统一
 def dateformat(timestamp: any):
     # UTC时间对象
     utc_dt = datetime.fromtimestamp(int(timestamp), timezone.utc)
@@ -172,7 +172,6 @@ def get_list(faker_id: str = None, mp_id: str = None, is_add: bool = False):
                 "title": art["title"],
                 "pic_url": art["cover"],
                 "publish_time": art["update_time"],
-                "publish_at": datetime.fromtimestamp(int(art["update_time"])),
                 "created_at": dateformat(art["create_time"]),
                 "updated_at": dateformat(art["update_time"]),
                 "content": content_extract(art["link"]),

@@ -47,18 +47,18 @@ echo %COMMENT_FLAG%
 if %COMMENT_FLAG%==1 (
     set comment=%USER_COMMENT%
 ) else (
-    set comment=%VERSION%
+    set comment=Fix
 )
 
 echo %comment%
 git add .
-git tag -a "v%VERSION%" -m "%VERSION%"
-git commit -m "%VERSION% %comment%"
+git tag -a 'v%VERSION% -m %VERSION%'
+git commit -m '%VERSION% %comment%'
 
 REM 执行git操作
 if %PUSH_FLAG%==1 (
     git pull origin main
-    git push -u origin main 
+    git push -u origin main
     git push origin  %tag%
     git push -u gitee main
     git push gitee  %tag%

@@ -2,6 +2,7 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class EventCreate(BaseModel):
     article_id: str
     article_url: Optional[str] = None

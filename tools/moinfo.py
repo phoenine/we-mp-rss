@@ -16,23 +16,23 @@ def getMoreInfo(link):
     # req_id = "0614ymV0y86FlTVXB02AXd8p"
     pass_ticket = ""  # 从fiddler中获取
     appmsg_token = ""  # 从fiddler中获取
-    uin = "" # 从fiddler 中获取
-    key = "" # 从fiddler 中获取
+    uin = ""  # 从fiddler 中获取
+    key = ""  # 从fiddler 中获取
 
     # 目标url
     url = "http://mp.weixin.qq.com/mp/getappmsgext"  # 获取详情页的网址
     # 添加Cookie避免登陆操作，这里的"User-Agent"最好为手机浏览器的标识
-    phoneCookie = "" # 从fiddler 中获取 
+    phoneCookie = ""  # 从fiddler 中获取
     headers = {
         "Cookie": phoneCookie,
-        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x63070517)"
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x63070517)",
     }
     # 添加data，`req_id`、`pass_ticket`分别对应文章的信息，从fiddler复制即可。
     data = {
         "is_only_read": "1",
         "is_temp_url": "0",
         "appmsg_type": "9",
-        'reward_uin_count': '0'
+        "reward_uin_count": "0",
     }
     """
     添加请求参数
@@ -75,14 +75,13 @@ def getMoreInfo(link):
     return readNum, likeNum, old_like_num
 
 
-
 df = pd.read_csv("data.csv")
 try:
     for index, row in enumerate(df.itertuples()):
         readNum, likeNum, old_like_num = getMoreInfo(row.url)
-        df.loc[index, 'likeNum'] = likeNum
-        df.loc[index, 'readNum'] = readNum
-        df.loc[index, 'old_like_num'] = old_like_num
+        df.loc[index, "likeNum"] = likeNum
+        df.loc[index, "readNum"] = readNum
+        df.loc[index, "old_like_num"] = old_like_num
         print(row.url)
         # 歇3s，防止被封
         time.sleep(3)

@@ -22,6 +22,7 @@ from apis.events import router as events_router
 import apis
 import os
 from core.config import cfg, VERSION, API_BASE
+from core.async_queue import TaskQueue
 
 app = FastAPI(
     title="WeRSS API",
@@ -119,3 +120,14 @@ async def serve_vue_app(request: Request, path: str):
 async def serve_root(request: Request):
     """处理根路由"""
     return await serve_vue_app(request, "")
+
+
+@app.on_event("startup")
+def start_task_queue():
+    TaskQueue.run_task_background()
+
+
+@app.on_event("shutdown")
+def stop_task_queue():
+    TaskQueue.stop()
+    TaskQueue.clear_queue()

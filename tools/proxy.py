@@ -475,7 +475,9 @@ class ProxyHandle(BaseHTTPRequestHandler):
         self._proxy_sock.connect((self.hostname, int(self.port)))
         # 进行SSL包裹
         context = ssl.create_default_context()
-        self._proxy_sock = context.wrap_socket(self._proxy_sock, server_hostname=self.hostname)
+        self._proxy_sock = context.wrap_socket(
+            self._proxy_sock, server_hostname=self.hostname
+        )
 
     def _proxy_to_dst(self):
         # 代理连接http目标服务器
@@ -515,10 +517,7 @@ class ProxyHandle(BaseHTTPRequestHandler):
             # 这个时候需要将客户端的socket包装成sslsocket,这个时候的self.path类似www.baidu.com:443，根据域名使用相应的证书
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             context.load_cert_chain(certfile=self.server.ca[self.path.split(":")[0]])
-            self.request = context.wrap_socket(
-                self.request,
-                server_side=True
-            )
+            self.request = context.wrap_socket(self.request, server_side=True)
         except SSLError:
             self.send_error(500, "更新证书!")
             return

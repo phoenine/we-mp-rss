@@ -1,5 +1,6 @@
 import requests
 import json
+import re
 from core.models import Feed
 from driver.wx import DoSuccess
 from core.db import DB
@@ -8,6 +9,7 @@ from .cfg import cfg, wx_cfg
 from core.print import print_error, print_info
 from core.rss import RSS
 from driver.success import setStatus
+from driver.wxarticle import Web
 import random
 
 # 定义一些常见的 User-Agent
@@ -55,19 +57,19 @@ class WxGather:
         self.RecordAid(aid)
         return False
 
-    def Model(self):
-        type = cfg.get("gather.model", "web")
-
+    def Model(self, type=None):
+        type = type or cfg.get("gather.model", "web")
+        print(f"采集模式:{type}")
         if type == "app":
-            from core.wx import MpsAppMsg
+            from core.wx.model.app import MpsAppMsg
 
             wx = MpsAppMsg()
         elif type == "web":
-            from core.wx import MpsWeb
+            from core.wx.model.web import MpsWeb
 
             wx = MpsWeb()
         else:
-            from core.wx import MpsApi
+            from core.wx.model.api import MpsApi
 
             wx = MpsApi()
         return wx
@@ -88,7 +90,6 @@ class WxGather:
         self.Gather_Content = cfg.get("gather.content", False)
         self.cookies = wx_cfg.get("cookie", "")
         self.token = wx_cfg.get("token", "")
-        # 随机选择一个 User-Agent
         self.user_agent = cfg.get("user_agent", "")
         user_agent = random.choice(USER_AGENTS)
         self.user_agent = user_agent
@@ -96,7 +97,6 @@ class WxGather:
 
     def fix_header(self, url):
         user_agent = random.choice(USER_AGENTS)
-        # 更新请求头
         headers = self.headers.copy()
         headers.update(
             {
@@ -114,11 +114,11 @@ class WxGather:
         text = ""
         try:
             session = self.session
-            # 更新请求头
             headers = self.fix_header(url)
             r = session.get(url, headers=headers)
             if r.status_code == 200:
                 text = r.text
+                text = self.remove_common_html_elements(text)
                 if "当前环境异常，完成验证后即可继续访问" in text:
                     print_error("当前环境异常，完成验证后即可继续访问")
                     text = ""
@@ -141,7 +141,6 @@ class WxGather:
                     "pic_url": data["cover"],
                     "content": data.get("content", ""),
                     "publish_time": data["update_time"],
-                    "publish_at": datetime.fromtimestamp(int(data["update_time"])),
                 }
                 if "digest" in data:
                     art["description"] = data["digest"]
@@ -176,9 +175,9 @@ class WxGather:
                 params=params,
                 headers=headers,
             )
-            response.raise_for_status()  # 检查状态码是否为200
-            data = response.text  # 解析JSON数据
-            msg = json.loads(data)  # 手动解析
+            response.raise_for_status()
+            data = response.text
+            msg = json.loads(data)
             if msg["base_resp"]["ret"] == 200013:
                 self.Error("frequencey control, stop at {}".format(str(kw)))
                 return
@@ -227,7 +226,6 @@ class WxGather:
         ]
         _cookies.append({"name": "token", "value": self.token})
         if len(_cookies) > 0:
-            # DoSuccess(_cookies)
             pass
         if CallBack is not None:
             CallBack(item)
@@ -238,17 +236,24 @@ class WxGather:
         if code == "Invalid Session":
             from jobs.failauth import send_wx_code
             import threading
+            from core.async_queue import TaskQueue
+            from core.print import print_error
+            from driver.success import setStatus
 
             setStatus(False)
-            from core.queue import TaskQueue
+            TaskQueue.delete_queue()
 
-            TaskQueue.clear_queue()
+            # 异步触发扫码通知，避免阻塞当前线程
             threading.Thread(
                 target=send_wx_code, args=(f"公众号平台登录失效,请重新登录",)
             ).start()
-            # send_wx_code(f"公众号平台登录失效,请重新登录")
-            raise Exception(error)
-        # raise Exception(error)
+
+            # 不再抛异常，让调用方自行 break 优雅退出
+            print_error(error)
+            return
+
+        # 非登录失效的错误仍按原逻辑抛出
+        raise Exception(error)
 
     def Over(self, CallBack=None):
         if getattr(self, "articles", None) is not None:
@@ -275,12 +280,82 @@ class WxGather:
         t = local_dt.strftime("%Y-%m-%d %H:%M:%S")
         return t
 
+    def remove_html_region(self, html_content: str, patterns: list) -> str:
+        """
+        使用正则表达式移除HTML中指定的区域内容
+
+        Args:
+            html_content: 原始HTML内容
+            patterns: 正则表达式模式列表，用于匹配需要移除的区域
+
+        Returns:
+            处理后的HTML内容
+        """
+        if not html_content or not patterns:
+            return html_content
+
+        processed_content = html_content
+
+        for pattern in patterns:
+            try:
+                # 使用正则表达式移除匹配的区域
+                processed_content = re.sub(
+                    pattern, "", processed_content, flags=re.DOTALL | re.IGNORECASE
+                )
+            except re.error as e:
+                print_error(f"正则表达式错误: {pattern}, 错误信息: {e}")
+                continue
+            except Exception as e:
+                print_error(f"处理HTML区域时发生错误: {e}")
+                continue
+
+        return processed_content
+
+    def remove_common_html_elements(self, html_content: str) -> str:
+        """
+        移除常见的HTML元素区域
+
+        Args:
+            html_content: 原始HTML内容
+
+        Returns:
+            处理后的HTML内容
+        """
+        if not html_content:
+            return html_content
+
+        # 常见的需要移除的HTML元素模式
+        common_patterns = [
+            # 移除script标签及其内容
+            r"<script[^>]*>.*?</script>",
+            # 移除style标签及其内容
+            r"<style[^>]*>.*?</style>",
+            # 移除注释
+            r"<!--.*?-->",
+            # 移除iframe标签
+            r"<iframe[^>]*>.*?</iframe>",
+            # 移除noscript标签
+            r"<noscript[^>]*>.*?</noscript>",
+            # 移除广告相关的div（包含特定class或id）
+            r'<div[^>]*(?:class|id)=["\'][^"\']*(?:ad|advertisement|banner)[^"\']*["\'][^>]*>.*?</div>',
+            # 移除header区域
+            r"<header[^>]*>.*?</header>",
+            # 移除footer区域
+            r"<footer[^>]*>.*?</footer>",
+            # 移除nav区域
+            r"<nav[^>]*>.*?</nav>",
+            # 移除aside区域
+            r"<aside[^>]*>.*?</aside>",
+        ]
+        html_content = Web.clean_article_content(html_content)
+        return self.remove_html_region(html_content, common_patterns)
+
     # 更新公众号更新状态
     def update_mps(self, mp_id: str, mp: Feed):
         """更新公众号同步状态和时间信息
         Args:
             mp_id: 公众号ID
-            mp: Feed对象，包含公众号信息
+            mp: Feed对象, 包含公众号信息
         """
         from datetime import datetime
         import time
@@ -291,7 +366,6 @@ class WxGather:
             current_time = int(time.time())
             update_data = {
                 "sync_time": current_time,
-                # 'updated_at': dateformat(current_time)
                 "updated_at": datetime.now(),
             }
 

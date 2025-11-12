@@ -38,3 +38,7 @@ def laxArticle():
     # session.close()
     return info.__dict__
     pass
+
+
+ARTICLE_INFO = laxArticle()
+print(ARTICLE_INFO)

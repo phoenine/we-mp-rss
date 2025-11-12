@@ -21,7 +21,7 @@ _START_TIME = time.time()
 async def get_base_info() -> Dict[str, Any]:
     try:
         from .ver import API_VERSION
-        from core.ver import VERSION as CORE_VERSION, LATEST_VERSION
+        from core.config import VERSION as CORE_VERSION, LATEST_VERSION
 
         base_info = {
             "api_version": API_VERSION,
@@ -59,9 +59,9 @@ async def system_resources(
         return error_response(code=50002, message=f"获取系统资源失败: {str(e)}")
 
 
-from core.article_lax import laxArticle
+from core.article_lax import ARTICLE_INFO, laxArticle
 from .ver import API_VERSION
-from core.ver import VERSION as CORE_VERSION, LATEST_VERSION
+from core.base import VERSION as CORE_VERSION, LATEST_VERSION
 
 
 @router.get("/info", summary="获取系统信息")
@@ -106,8 +106,7 @@ async def get_system_info(
                 "info": getLoginInfo(),
                 "login": getStatus(),
             },
-            # 按需计算文章统计，避免在导入阶段进行数据库访问
-            "article": laxArticle(),
+            "article": ARTICLE_INFO,
             "queue": TaskQueue.get_queue_info(),
         }
         return success_response(data=system_info)

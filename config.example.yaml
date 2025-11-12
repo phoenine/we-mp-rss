@@ -1,19 +1,19 @@
 app_name: ${APP_NAME:-we-mp-rss}
 server:
-   #服务名称
-   name: ${SERVER_NAME:-we-mp-rss}
-   #前端显示名称
-   web_name: ${WEB_NAME:-WeRSS微信公众号订阅助手}
-   #过期是否发送授权二维通知 默认True
-   send_code: ${SEND_CODE:-True}
-   #二维通知标题
-   code_title: ${CODE_TITLE:-WeRSS}
-   #启动JOB定时任务，默认为True
-   enable_job: ${ENABLE_JOB:-True}
-   #代码修改自动重启服务，默认为False
-   auto_reload: ${AUTO_RELOAD:-False}
-   #最大线程数 默认2个线程，不建议超过4个线程
-   threads: ${THREADS:-4}
+  #服务名称
+  name: ${SERVER_NAME:-we-mp-rss}
+  #前端显示名称
+  web_name: ${WEB_NAME:-WeRSS微信公众号订阅助手}
+  #过期是否发送授权二维通知 默认True
+  send_code: ${SEND_CODE:-True}
+  #二维通知标题
+  code_title: ${CODE_TITLE:-WeRSS}
+  #启动JOB定时任务，默认为True
+  enable_job: ${ENABLE_JOB:-True}
+  #代码修改自动重启服务，默认为False
+  auto_reload: ${AUTO_RELOAD:-False}
+  #最大线程数 默认2个线程，不建议超过4个线程
+  threads: ${THREADS:-4}
 
 #数据库连接 例如db:  mysql+pymysql://<username>:<password>@<host>/we-rss?charset=utf8mb4
 #PostgreSQL 连接示例: postgresql://<username>:<password>@<host>/<database>
@@ -27,7 +27,7 @@ notice:
   wechat: "${WECHAT_WEBHOOK}"
   feishu: "${FEISHU_WEBHOOK}"
   custom: "${CUSTOM_WEBHOOK}"
-  
+
 secret: ${SECRET_KEY:-we-mp-rss}
 user_agent: ${USER_AGENT:-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36/WeRss}
 
@@ -37,12 +37,11 @@ interval: ${SPAN_INTERVAL:- 10}
 webhook:
   #文章内容的发送格式(默认使用html格式，可选text、markdown)
   content_format: ${WEBHOOK.CONTENT_FORMAT:-html}
-  
+
 #API服务端口
 port: ${PORT:-8001}
 #调试模式
 debug: ${DEBUG:-False}
-
 
 #最大页数 第一次添加 采集的页数默认5页
 max_page: ${MAX_PAGE:-5}
@@ -91,22 +90,22 @@ gather:
   content_mode: ${GATHER.CONTENT_MODE:-web}
 #安全配置
 safe:
-    # 需要隐藏的配置信息，用逗号分隔 如：db,secret,token等 
-    hide_config: "${SAFE_HIDE_CONFIG:-db,secret,token,notice.wechat,notice.feishu,notice.dingding}"
-    # 授权加密KEY
-    lic_key: "${SAFE_LIC_KEY:-RACHELOS}"
+  # 需要隐藏的配置信息，用逗号分隔 如：db,secret,token等
+  hide_config: "${SAFE_HIDE_CONFIG:-db,secret,token,notice.wechat,notice.feishu,notice.dingding}"
+  # 授权加密KEY
+  lic_key: "${SAFE_LIC_KEY:-RACHELOS}"
 log:
   #日志文件路径，默认为空字符串，表示不输出到文件。如果要输出到文件，可以指定一个路径如：/var/log/we-mp-rss.log 如果为空就不纪录
-   file: ${LOG_FILE:-}
+  file: ${LOG_FILE:-}
   #日志级别，默认为INFO，可选DEBUG, INFO, WARNING, ERROR, CRITICAL
-   level: ${LOG_LEVEL:-INFO}
+  level: ${LOG_LEVEL:-INFO}
 export:
-   pdf: 
+  pdf:
     #是否启用PDF导出功能 默认False
     enable: ${EXPORT_PDF:-False}
     #PDF导出目录 默认./data/pdf
     dir: ${EXPORT_PDF_DIR:-./data/pdf}
-   markdown:
+  markdown:
     #是否启用markdown导出功能 默认False
     enable: ${EXPORT_MARKDOWN:-False}
     #markdown导出目录 默认./data/markdown

@@ -1,4 +1,3 @@
-# 顶部导入与路由创建（节选）
 from fastapi import APIRouter, Depends, HTTPException, status as fast_status, Query
 from core.auth import get_current_user
 from core.db import DB
@@ -17,7 +16,9 @@ router = APIRouter(prefix=f"/articles", tags=["文章管理"])
 async def clean_expired_articles(current_user: dict = Depends(get_current_user)):
     try:
         deleted_count = DB.clean_expired_articles()
-        return success_response({"message": "清理过期文章成功", "deleted_count": deleted_count})
+        return success_response(
+            {"message": "清理过期文章成功", "deleted_count": deleted_count}
+        )
     except Exception as e:
         print_error(f"清理过期文章错误: {str(e)}")
         raise HTTPException(

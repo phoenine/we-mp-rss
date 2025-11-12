@@ -1,6 +1,8 @@
 from jobs import start_job
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import init_sys as init
+
     init.init()
     # 启动定时任务
     start_job()
