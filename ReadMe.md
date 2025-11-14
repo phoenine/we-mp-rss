@@ -7,6 +7,14 @@
 
 [中文](README.zh-CN.md)|[English](ReadMe.md)
 
+项目原路径： https://github.com/rachelos/we-mp-rss
+
+本地做了些小改动，增加了清理过期文章的功能，以及LLM获取活动的API接口。
+
+![](/docs/新增功能.png)
+
+这个仓库不打算更新了，打算魔改下，做成前后端的分离，数据库接入supabase。新建个仓库再来搞吧。
+
 Quick Start
 ```
 docker run -d  --name we-mp-rss  -p 8001:8001 -v ./data:/app/data  ghcr.io/rachelos/we-mp-rss:latest

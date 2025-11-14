@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 
 class ConfigManager:
-    """配置管理器，负责YAML配置与数据库之间的双向转换"""
+    """配置管理器, 负责YAML配置与数据库之间的双向转换"""
 
     def __init__(self, config_path="config.yaml"):
         """
